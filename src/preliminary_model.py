@@ -14,7 +14,7 @@ from sklearn.metrics import accuracy_score
 import optuna
 import argparse
 
-# Try optimising hyperparameters with optuna
+# Try optimising hyperparameters with optuna - bayesian methods
 
 class Objective(object):
     def __init__(self, study_name):
