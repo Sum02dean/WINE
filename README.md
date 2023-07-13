@@ -13,4 +13,4 @@ pip install -r requirements.txt
 ```
 
 ## Data
-TBD
+See src/get_datasets.py
