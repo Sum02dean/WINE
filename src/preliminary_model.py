@@ -1,6 +1,3 @@
-# Import the data
-
-
 import pandas as pd
 import numpy as np
 import sklearn
@@ -14,7 +11,7 @@ from sklearn.metrics import accuracy_score
 import optuna
 import argparse
 
-# Try optimising hyperparameters with optuna - bayesian methods
+# Try optimising baseline model hyperparameters with Optuna - bayesian autoML methods
 
 class Objective(object):
     def __init__(self, study_name):
@@ -38,10 +35,14 @@ class Objective(object):
         self.test_features = self.test_x.values
 
     def __call__(self, trial):
+
+        # Get the train data
         x, y = self.train_features, self.train_labels
 
         # classifier_name = trial.suggest_categorical("classifier", ["SVC", "RandomForest"])
         classifier_name = 'RandomForest'
+        
+        # Iterate over model specific hyper-parameters 
         if classifier_name == "SVC":
             svc_c = trial.suggest_float("svc_c", 1e-10, 1e10, log=True)
             svc_gamma = trial.suggest_float("svc_c", 1e-10, 1e10, log=True)
@@ -69,7 +70,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     print(args)
 
-    # Load the dataset in advance for reusing it each trial execution.
+    # Setup dynamic logging
     study_name = args.study_name
     objective = Objective(study_name=study_name)
     study = optuna.create_study(
