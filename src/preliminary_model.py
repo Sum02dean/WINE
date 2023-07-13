@@ -12,7 +12,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 import optuna
-
+import argparse
 
 # Try optimising hyperparameters with optuna
 
@@ -53,11 +53,6 @@ class Objective(object):
                 max_depth=rf_max_depth, n_estimators=rf_n_estimators
             )
         
-
-        # Define the scoring metric - for cross validation
-        # score = sklearn.model_selection.cross_val_score(classifier_obj, x, y, n_jobs=-1, cv=3)
-        # accuracy = score.max()
-
         # Predict on the train set
         trained_model = classifier_obj.fit(X=self.train_features, y=self.train_labels)
 
@@ -66,16 +61,20 @@ class Objective(object):
         test_acc = accuracy_score(self.test_labels, test_pred)
         return test_acc
 
-
 if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--study_name", help="study name for optuna log",
+                        type=str)
+    args = parser.parse_args()
+    print(args)
+
     # Load the dataset in advance for reusing it each trial execution.
-    study_name = 'study_rf_no_cv'
+    study_name = args.study_name
     objective = Objective(study_name=study_name)
     study = optuna.create_study(
-    
-    # Specify host
-    storage="sqlite:///db.sqlite3",  # Specify the storage URL here.
-    study_name=study_name, direction='maximize')
+        storage="sqlite:///db.sqlite3",
+        study_name=study_name, direction='maximize')
     
     #Optimize
     study.optimize(objective, n_trials=100)
