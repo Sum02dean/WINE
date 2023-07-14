@@ -13,7 +13,6 @@ In the project base folder execute in the command line:
 
 ```commandline
 conda env create -f environment.yml
-pip install -r requirements.txt
 ```
 
 ## Data
