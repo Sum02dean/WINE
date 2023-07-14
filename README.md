@@ -2,8 +2,10 @@
 Wine classification project
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://github.com/feross/standard)
 
+<p align="center">
+  <img src="wine_img.png" width="450">
+</p>
 
-<img src="wine_img.png" width="450">
 
 ## Setup
 Dependencies for conda and pip are listed in `environment.yml` and `requirements.txt`.
