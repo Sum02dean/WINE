@@ -16,5 +16,5 @@ pip install -r requirements.txt
 ## Data
 From the command line, navigate to the src directory and run: 
 ```python
-    python get_dataset.py
+python get_dataset.py
 ```
