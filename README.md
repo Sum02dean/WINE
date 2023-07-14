@@ -30,7 +30,7 @@ python preliminary_model.py --study_name {name_of_your_study}
 
 ## MLflow
 Either during or after you have submitted the above model run, open a new terminal <br/>
-, navigate to the src directory and run:
+navigate to the src directory and run:
 
 ```commandline
 mlflow ui
@@ -40,7 +40,7 @@ Follow the link generated to track your model, performance stats, artifacts and 
 
 ## Optuna
 Similar to the above, open a new terminal <br/>
-, navigate to the src directory and run:
+navigate to the src directory and run:
 
 ```commandline
 optuna-dashboard sqlite:///db.sqlite3
