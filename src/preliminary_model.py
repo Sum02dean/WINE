@@ -78,6 +78,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--study_name", help="study name for optuna log",
                         type=str)
+    
     args = parser.parse_args()
     print(args)
 
@@ -88,7 +89,7 @@ if __name__ == "__main__":
         study_name=study_name, direction='maximize')
     
     # Optimize
-    mlflow.set_experiment(experiment_name='deans_run_2')
+    mlflow.set_experiment(experiment_name=args.study_name)
     study.optimize(objective, n_trials=100)
     
     
