@@ -8,7 +8,7 @@ Wine classification project
 
 
 ## Setup
-Dependencies for conda and pip are listed in `environment.yml` and `requirements.txt`.
+Dependencies for conda and pip are listed in `environment.yml`
 In the project base folder execute in the command line:
 
 ```commandline
