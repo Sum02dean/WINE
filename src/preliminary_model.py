@@ -70,12 +70,6 @@ def objective(trial):
 
         # Log the datasets
         mlflow.log_artifacts('/Users/sum02dean/projects/wine_challenge/WINE/data')
-        # mlflow.log_artifact('/Users/sum02dean/projects/wine_challenge/WINE/data/scaled_unclipped_test_x.csv')
-        # mlflow.log_artifact('/Users/sum02dean/projects/wine_challenge/WINE/data/train_y.csv')
-        # mlflow.log_artifact('/Users/sum02dean/projects/wine_challenge/WINE/data/test_y.csv')
-
-
-
 
         # Log the hyperparameters and trial metrics with mlflow
         signature = infer_signature(test_pred, test_pred)
