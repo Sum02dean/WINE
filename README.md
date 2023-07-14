@@ -1,6 +1,8 @@
 # WINE
 Wine classification project
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://github.com/feross/standard)
+
+
 <img src="wine_img.png" width="450">
 
 ## Setup
