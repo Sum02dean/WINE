@@ -21,6 +21,12 @@ From the command line, navigate to the src directory and run:
 ```commandline
 python get_dataset.py
 ```
+This will also generate the data directory if not already existing.
+
+To preprocess the data, run:
+```commandline
+python notebooks/examine_data.py
+```
 
 ## Running code
 From the command line, navigate to the src directory and run: 
