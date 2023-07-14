@@ -89,7 +89,7 @@ if __name__ == "__main__":
     
     # Optimize
     mlflow.set_experiment(experiment_name='deans_run_2')
-    study.optimize(objective, n_trials=5)
+    study.optimize(objective, n_trials=100)
     
     
     # To run on terminal after training

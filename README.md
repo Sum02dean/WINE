@@ -7,10 +7,14 @@ Wine classification project
 ## Setup
 Dependencies for conda and pip are listed in `environment.yml` and `requirements.txt`.
 In the project base folder execute in the command line:
+
 ```commandline
 conda env create -f environment.yml
 pip install -r requirements.txt
 ```
 
 ## Data
-See src/get_datasets.py
+From the command line, navigate to the src directory and run: 
+```python
+    python get_dataset.py
+```
