@@ -100,19 +100,38 @@ test_x = pd.read_csv('/Users/sum02dean/projects/wine_challenge/WINE/data/scaled_
 train_y = pd.read_csv('/Users/sum02dean/projects/wine_challenge/WINE/data/train_y.csv')
 test_y = pd.read_csv('/Users/sum02dean/projects/wine_challenge/WINE/data/test_y.csv')
 
-# Re-balance the labels
+# Re-balance the labels train
 train_y['class'] = 0
 train_y.loc[train_y['quality'] > 5, 'class'] = 1
 train_x['labels'] = train_y['class']
+
 train_x_bad = train_x[train_x['labels'] == 0]
 train_x_good = train_x[train_x['labels'] == 1]
 train_x_good_sample = train_x_good.sample(n=np.shape(train_x_bad)[0])
 
-# Make the dataset balanced
+# Re-balance the labels test
+test_y['class'] = 0
+test_y.loc[test_y['quality'] > 5, 'class'] = 1
+test_x['labels'] = test_y['class']
+
+test_x_bad = test_x[test_x['labels'] == 0]
+test_x_good = test_x[test_x['labels'] == 1]
+test_x_good_sample = test_x_good.sample(n=np.shape(test_x_bad)[0])
+
+# Make the dataset balanced - train
 train_x = pd.concat([train_x_good_sample, train_x_bad], axis=0)
 train_y = train_x.loc[:, 'labels']
 train_ohe_y = one_hot(torch.tensor(train_y.values))
 train_x = train_x.iloc[:, :-1]
+
+# Make the dataset balanced - test
+test_x = pd.concat([test_x_good_sample, test_x_bad], axis=0)
+test_y = test_x.loc[:, 'labels']
+test_ohe_y = one_hot(torch.tensor(test_y.values))
+test_ohe_y = one_hot(torch.tensor(test_y.values))
+test_x = test_x.iloc[:, :-1]
+
+
 print(train_ohe_y.shape)
 print(train_x.shape)
 
@@ -123,7 +142,10 @@ params = {'batch_size': 64,
 
 # Train Dataloader
 train_dataset = MyDataset(train_x.values, train_ohe_y)
+test_dataset = MyDataset(test_x.values, train_ohe_y)
+
 train_dl = torch.utils.data.DataLoader(train_dataset, **params)
+test_dl = torch.utils.data.DataLoader(test_dataset, **params)
 
 # Specify input and output layers
 n_input_neurons = 13
@@ -222,14 +244,66 @@ df.loc[df['predictions'] != df['targets'], 'correct'] = 0
 percentage_correct = (df['correct'].sum() / df.shape[0]) * 100
 print(f'Accuracy: {percentage_correct:.02f} %')
 
-# Plot the ROC curve
+# Test predictions
+preds_test = []
+targets_test = []
+all_logits_test = []
+# Predictions
+for i, data in enumerate(test_dl):
+    
+    # Get the inputs & labels
+    batch, labels = data
+
+    # Convert the data-types
+    batch = batch.type(torch.FloatTensor)
+    labels = labels.type(torch.FloatTensor)
+    
+    # Transfer to device
+    batch, labels = batch.to(device), labels.to(device)
+
+    with torch.no_grad():
+        logits = model(batch)
+        predictions = torch.where(logits > 0.5, 1, 0)
+        predictions = [np.argmax(x) for x in predictions.detach().numpy()]
+        targs = [np.argmax(x) for x in labels.detach().numpy()]
+        logits = [x[1] for x in logits.detach().numpy()]
+        preds_test.append(predictions)
+        targets_test.append(targs)
+        all_logits_test.append(logits)
+
+# Reformat the test outputs
+all_preds_test = [item for sublist in preds_test for item in sublist]
+all_targs_test = [item for sublist in targets_test for item in sublist]
+all_logits_test = [item for sublist in all_logits_test for item in sublist] 
+
+df_test = pd.DataFrame({'predictions': all_preds_test, 'targets':all_targs_test})
+df_test.loc[df_test['predictions'] == df_test['targets'], 'correct'] = 1
+df_test.loc[df_test['predictions'] != df_test['targets'], 'correct'] = 0
+
+# Report test accuracy 
+percentage_correct = (df_test['correct'].sum() / df_test.shape[0]) * 100
+print(f'Accuracy: {percentage_correct:.02f} %')
+
+# Plot the train ROC curve
+fig, axs = plt.subplots(figsize=(9,9))
 roc_auc_score(all_targs, all_logits)
 RocCurveDisplay.from_predictions(
     all_targs,
     all_logits,
-    name="Good Quality",
+    name="Good Quality - Train",
     color="darkorange",
     plot_chance_level=True,
+    ax=axs
+)
+
+# Plot the test ROC curve
+roc_auc_score(all_targs_test, all_logits_test)
+RocCurveDisplay.from_predictions(
+    all_targs_test,
+    all_logits_test,
+    name="Good Quality - Test",
+    color="blue",
+    ax=axs
 )
 plt.axis("square")
 plt.xlabel("False Positive Rate")
