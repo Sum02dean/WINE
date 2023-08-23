@@ -109,7 +109,7 @@ train_x_good = train_x[train_x['labels'] == 1]
 train_x_good_sample = train_x_good.sample(n=np.shape(train_x_bad)[0])
 
 # Make the dataset balanced
-train_x = pd.concat([train_x_good, train_x_bad], axis=0)
+train_x = pd.concat([train_x_good_sample, train_x_bad], axis=0)
 train_y = train_x.loc[:, 'labels']
 train_ohe_y = one_hot(torch.tensor(train_y.values))
 train_x = train_x.iloc[:, :-1]
