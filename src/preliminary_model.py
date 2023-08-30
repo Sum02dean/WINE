@@ -1,5 +1,5 @@
-""" Runs a Bayesiasn hyperparameter optimisation search using Optuna 
-to train and predict  on a classicifation problem - check for linting!!!. """
+""" Runs a Bayesian hyperparameter optimisation search using Optuna 
+to train and predict on a classicifation probl em."""
 
 import pandas as pd
 import numpy as np
