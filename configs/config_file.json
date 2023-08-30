@@ -1,15 +1,15 @@
 {
     "data_params": {
-        "X_train_path": "/Users/sum02dean/projects/wine_challenge/WINE/data/scaled_clippped_train_x.csv",
+        "x_train_path": "/Users/sum02dean/projects/wine_challenge/WINE/data/scaled_clippped_train_x.csv",
         "y_train_path": "/Users/sum02dean/projects/wine_challenge/WINE/data/train_y.csv",
-        "X_test_path": "/Users/sum02dean/projects/wine_challenge/WINE/data/scaled_unclipped_test_x.csv",
+        "x_test_path": "/Users/sum02dean/projects/wine_challenge/WINE/data/scaled_unclipped_test_x.csv",
         "y_test_path": "/Users/sum02dean/projects/wine_challenge/WINE/data/test_y.csv"},
         
     "mlflow_params": {
         "project_name": "wine",
         "experiment_name": "wine",
         "run_name": "wine",
-        "study_name": "wine_with_configs_v8",
+        "study_name": "wine_with_configs_v11",
         "tracking_uri": "http://localhost:5000",
         "mlflow_tracking_uri": "http://localhost:5000",
         "mlflow_server_uri": "http://localhost:5000",

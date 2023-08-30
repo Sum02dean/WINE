@@ -1,22 +1,15 @@
-""" Runs a Bayesian hyperparameter optimisation search using Optuna 
-to train and predict on a classicifation problems b."""
+""" Runs a Bayesian hyperparameter optimisation search using Optuna
+to train and predict on a classicifation problem."""
 
 import pandas as pd
-import numpy as np
-import sklearn
-import numpy as np
 from sklearn.metrics import accuracy_score
 import optuna
 import argparse
 import mlflow
 import mlflow.sklearn
-from mlflow.tracking import MlflowClient
 from mlflow.models.signature import infer_signature
 import mlflow.sklearn
 import logging
-from urllib.parse import urlparse
-from optuna.integration.mlflow import MLflowCallback
-from mlflow.data.pandas_dataset import PandasDataset
 from random_forest import RandomForest
 from support_vector_classifier import SVClassifier
 import json
@@ -31,8 +24,8 @@ def objective(trial):
     with mlflow.start_run(run_name=str(trial.number)):
 
         # Features
-        train_x_raw = pd.read_csv(data_params['X_train_path'])
-        test_x_raw  = pd.read_csv(data_params['X_test_path'])
+        train_x_raw = pd.read_csv(data_params['x_train_path'])
+        test_x_raw  = pd.read_csv(data_params['x_test_path'])
 
         # Labels
         train_y_raw  = pd.read_csv(data_params['y_train_path'])
@@ -45,7 +38,7 @@ def objective(trial):
         if classifier_name == "SVC":
             print("Initializing model")
             model = SVClassifier()
-            X_train, y_train = model.reshape_data(train_x_raw, train_y_raw)
+            x_train, y_train = model.reshape_data(train_x_raw, train_y_raw)
             X_test, y_test = model.reshape_data(test_x_raw , test_y_raw)
 
             # Define optimizable hyperparameters ranges: C
@@ -64,7 +57,7 @@ def objective(trial):
         elif classifier_name == "RandomForest":
             print("Initializing model")
             model = RandomForest()
-            X_train, y_train = model.reshape_data(train_x_raw, train_y_raw)
+            x_train, y_train = model.reshape_data(train_x_raw, train_y_raw)
             X_test, y_test = model.reshape_data(test_x_raw , test_y_raw)
 
             # Define optimizable hyperparameters ranges: max depth
@@ -81,14 +74,12 @@ def objective(trial):
             classifier_obj = RandomForest(max_depth=rf_max_depth, n_estimators=rf_n_estimators)
 
         # Predict on the train set
-        predictions = model.fit_predict(X_train, y_train, X_test)
+        predictions = model.fit_predict(x_train, y_train, X_test)
         test_acc = accuracy_score(y_test, predictions)
 
-        # Log the datasets
-        mlflow.log_artifacts('/Users/sum02dean/projects/wine_challenge/WINE/data')
-
-        # Log the hyperparameters and trial metrics with mlflow
+        # Log artifcats
         signature = infer_signature(predictions, predictions)
+        mlflow.log_artifacts('/Users/sum02dean/projects/wine_challenge/WINE/data')
         mlflow.log_params(trial.params)
         mlflow.log_metric('test_accuracy', test_acc)
         mlflow.sklearn.log_model(classifier_obj, classifier_name, signature=signature)
