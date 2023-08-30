@@ -10,11 +10,10 @@ name: Upload Python Package
 
 on:
   push:
-    branches: [ "dev", "main"]
+    branches: ["dev", "main"]
     paths: 
-      - 'factorial.py'
-      - 'lint.py'
-      - 'pytest_test.py'
+      - 'preliminary_model.py'
+      - 'linter.py'
       
   #pull_request:
     #branches: [ "main" ]
