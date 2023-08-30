@@ -13,6 +13,7 @@ from torch.utils.data import Dataset, DataLoader
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import RocCurveDisplay
 import matplotlib.pyplot as plt
+from utils import MyDataset
 
 # Set the device
 use_cuda = torch.cuda.is_available()
@@ -20,78 +21,7 @@ device = torch.device("cuda:0" if use_cuda else "cpu")
 torch.backends.cudnn.benchmark = True
 print(device)
 
-class LayerBlock(nn.Module):
-    # Create a single layer block consisting of linear, optional batchnorm and leakyrelu
-    def __init__(self, input_neurons, output_neurons, batch_norm=False, final_layer=False):
-        super().__init__()
-        
-        self.inp = input_neurons
-        self.out = output_neurons
-        self.batch_norm = batch_norm
-        self.final_layer = final_layer
 
-        self.linear = nn.Linear(self.inp, self.out) 
-        if self.batch_norm == True:
-            self.bn = nn.BatchNorm1d(self.out) 
-            
-        self.act = nn.LeakyReLU() if self.final_layer == False else nn.Sigmoid()
-        
-        
-    def forward(self, x):
-        x = self.linear(x)
-
-        if self.batch_norm == True:
-            x = self.bn(x)
-            
-        x = self.act(x)
-        return x
-        
-class ModuleNet(nn.Module):
-    # Will iterate over each module in module list and make full forward pass
-    def __init__(self, module_list):
-        super().__init__()
-        self.mods = module_list
-        # self.sig = nn.Sigmoid()
-
-    def forward(self, x):
-        # ModuleList can act as an iterable, or be indexed using ints
-        for i, l in enumerate(self.mods):
-            x = l(x) 
-        return x
-
-class MyDataset(torch.utils.data.Dataset):
-    def __init__(self, features, labels):
-        self.labels = labels
-        self.features = features
-    
-    def __len__(self):
-        'Denotes the total number of samples'
-        return np.shape(self.features)[0]
-
-    def __getitem__(self, index):
-        'Generates one sample of data'
-        x = self.features[index]
-        y = self.labels[index]
-        return x, y
-    
-class SimpleNet(nn.Module):
-
-    def __init__(self, in_dim, out_dim, final_dim):
-        super().__init__()
-        self.in_dim = in_dim
-        self.out_dim = out_dim
-        self.final_dim = final_dim
-
-        self.linear_1 = nn.Linear(self.in_dim, self.out_dim)
-        self.linear_2 = nn.Linear(self.out_dim, self.out_dim)
-        self.final_layer = nn.Linear(self.out_dim, self.final_dim)
-
-    def forward(self, x):
-        x = F.relu(self.linear_1(x))
-        x = F.relu(self.linear_2(x))
-        x = F.sigmoid(self.final_layer(x))
-        return x
-    
 # Features have already been pre-processed
 train_x = pd.read_csv('/Users/sum02dean/projects/wine_challenge/WINE/data/scaled_unclipped_train_x.csv')
 test_x = pd.read_csv('/Users/sum02dean/projects/wine_challenge/WINE/data/scaled_unclipped_test_x.csv')

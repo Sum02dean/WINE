@@ -9,7 +9,7 @@
         "project_name": "wine",
         "experiment_name": "wine",
         "run_name": "wine",
-        "study_name": "wine_with_configs_v11",
+        "study_name": "wine_with_configs_v14",
         "tracking_uri": "http://localhost:5000",
         "mlflow_tracking_uri": "http://localhost:5000",
         "mlflow_server_uri": "http://localhost:5000",
@@ -21,9 +21,9 @@
 
         "random_forest": {
             "max_depth_lower_sample": 10,
-            "max_depth_upper_sample": 1e10,
+            "max_depth_upper_sample": 1e1,
             "n_estimators_lower_sample": 1,
-            "n_estimators_upper_sample": 1e10},
+            "n_estimators_upper_sample": 1e1},
 
         "svm": {
             "c_lower_sample": 2,

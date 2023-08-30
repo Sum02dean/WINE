@@ -2,6 +2,7 @@
 from abc import abstractmethod, ABC
 from sklearn.metrics import accuracy_score
 import numpy as np
+import torch
 
 class BaseModel(ABC):
 
@@ -36,3 +37,19 @@ class BaseModel(ABC):
         y = y.values.reshape(-1)
         return X, y
    
+
+class MyDataset(torch.utils.data.Dataset):
+    def __init__(self, features, labels):
+        self.labels = labels
+        self.features = features
+    
+    def __len__(self):
+        'Denotes the total number of samples'
+        return np.shape(self.features)[0]
+
+    def __getitem__(self, index):
+        'Generates one sample of data'
+        x = self.features[index]
+        y = self.labels[index]
+        return x, y
+    
