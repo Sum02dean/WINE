@@ -43,7 +43,7 @@ mlflow ui
 
 Follow the link generated to track your model, performance stats, artifacts and pipelines.
 <p align="center">
-  <img src="optuna.png" width="800">
+  <img src="mlflow.png" width="800">
 </p>
 
 
