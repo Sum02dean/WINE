@@ -9,7 +9,6 @@ import optuna
 import mlflow
 import mlflow.sklearn
 from mlflow.models.signature import infer_signature
-import mlflow.sklearn
 from random_forest import RandomForest
 from support_vector_classifier import SVClassifier
 
@@ -38,7 +37,7 @@ def objective(trial):
             print("Initializing model")
             model = SVClassifier()
             x_train, y_train = model.reshape_data(train_x_raw, train_y_raw)
-            X_test, y_test = model.reshape_data(test_x_raw , test_y_raw)
+            x_test, y_test = model.reshape_data(test_x_raw , test_y_raw)
 
             # Define optimizable hyperparameters ranges: C
             lower_sample_c = model_params['svm']['c_lower_sample']
@@ -103,7 +102,7 @@ if __name__ == "__main__":
     configs = json.load(
         open(
             "/Users/sum02dean/projects/wine_challenge/WINE/configs/config_file.json",
-              encoding=None))
+              encoding='utf-8'))
 
     # Extract parameters
     mlflow_params = configs.get("mlflow_params")
