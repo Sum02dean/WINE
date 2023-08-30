@@ -18,6 +18,15 @@ logger = logging.getLogger(__name__)
 
 # Try optimising baseline model hyperparameters with Optuna - bayesian autoML methods
 def objective(trial):
+    """
+    Optimize the hyperparameters of a classifier using a Bayesian search algorithm.
+
+    Parameters:
+    - trial: An instance of the Trial class provided by Optuna, which represents a single run of the optimization algorithm.
+
+    Returns:
+    - test_acc: A float representing the accuracy of the model on the test set.
+    """
 
     with mlflow.start_run(run_name=str(trial.number)):
 
