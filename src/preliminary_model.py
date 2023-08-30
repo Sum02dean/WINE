@@ -1,18 +1,17 @@
 """ Runs a Bayesian hyperparameter optimisation search using Optuna
-to train and predict on a classicifation problem."""
-
+to train and predict on a classicifation problems."""
+import json
+import logging
+import argparse
 import pandas as pd
 from sklearn.metrics import accuracy_score
 import optuna
-import argparse
 import mlflow
 import mlflow.sklearn
 from mlflow.models.signature import infer_signature
 import mlflow.sklearn
-import logging
 from random_forest import RandomForest
 from support_vector_classifier import SVClassifier
-import json
 
 # Establish mlflow logging config
 logging.basicConfig(level=logging.WARN)
@@ -30,11 +29,11 @@ def objective(trial):
         # Labels
         train_y_raw  = pd.read_csv(data_params['y_train_path'])
         test_y_raw  = pd.read_csv(data_params['y_test_path'])
-        
+
         # Sample these classifiers
         classifier_name = trial.suggest_categorical("classifier", ["SVC", "RandomForest"])
 
-        # Iterate over model specific hyper-parameters 
+        # Iterate over model specific hyper-parameters
         if classifier_name == "SVC":
             print("Initializing model")
             model = SVClassifier()
@@ -50,31 +49,37 @@ def objective(trial):
             upper_sample_gamma = model_params['svm']['gamma_upper_sample']
 
             # Bayesian search over sampled space
-            svc_c = trial.suggest_float("svc_c", lower_sample_c, upper_sample_c, log=True)
-            svc_gamma = trial.suggest_float("svc_gamma", lower_sample_gamma, upper_sample_gamma, log=True)
+            svc_c = trial.suggest_float(
+                "svc_c", lower_sample_c, upper_sample_c, log=True)
+
+            svc_gamma = trial.suggest_float(
+                "svc_gamma", lower_sample_gamma, upper_sample_gamma, log=True)
             classifier_obj = SVClassifier(C=svc_c, gamma=svc_gamma)
 
         elif classifier_name == "RandomForest":
             print("Initializing model")
             model = RandomForest()
             x_train, y_train = model.reshape_data(train_x_raw, train_y_raw)
-            X_test, y_test = model.reshape_data(test_x_raw , test_y_raw)
+            x_test, y_test = model.reshape_data(test_x_raw , test_y_raw)
 
             # Define optimizable hyperparameters ranges: max depth
             lower_sample_max_depth = model_params['random_forest']['max_depth_lower_sample']
             upper_sample_max_depth = model_params['random_forest']['max_depth_upper_sample']
-            
+
             # Define optimizable hyperparameters ranges: n_estimators
             lower_sample_n_estimators = model_params['random_forest']['n_estimators_lower_sample']
             upper_sample_n_estimators = model_params['random_forest']['n_estimators_upper_sample']
-            
+
             # Bayesian search over sampled space
-            rf_max_depth = trial.suggest_int("rf_max_depth", lower_sample_max_depth, upper_sample_max_depth, log=True)
-            rf_n_estimators = trial.suggest_int("rf_n_estimators", lower_sample_n_estimators, upper_sample_n_estimators, log=True)
+            rf_max_depth = trial.suggest_int("rf_max_depth", lower_sample_max_depth,
+                                             upper_sample_max_depth, log=True)
+
+            rf_n_estimators = trial.suggest_int("rf_n_estimators", lower_sample_n_estimators,
+                                                upper_sample_n_estimators, log=True)
             classifier_obj = RandomForest(max_depth=rf_max_depth, n_estimators=rf_n_estimators)
 
         # Predict on the train set
-        predictions = model.fit_predict(x_train, y_train, X_test)
+        predictions = model.fit_predict(x_train, y_train, x_test)
         test_acc = accuracy_score(y_test, predictions)
 
         # Log artifcats
@@ -93,26 +98,28 @@ if __name__ == "__main__":
     parser.add_argument("--config_file", help="path to configs file",
                         type=str, default="WINE/configs/config_file.json")
     args = parser.parse_args()
-    
+
     # Read in the parameters from configs file
-    configs = json.load(open("/Users/sum02dean/projects/wine_challenge/WINE/configs/config_file.json"))
-    mlflow_params = configs.get("mlflow_params")
+    configs = json.load(
+        open(
+            "/Users/sum02dean/projects/wine_challenge/WINE/configs/config_file.json",
+              encoding=None))
 
     # Extract parameters
     mlflow_params = configs.get("mlflow_params")
     model_params = configs.get("model_params")
     data_params = configs.get("data_params")
-    
+
     # Create Optuna study
     study = optuna.create_study(
         storage=mlflow_params["storage"],
         study_name=mlflow_params["study_name"], direction='maximize')
-    
+
     # Optimize
     mlflow.set_experiment(experiment_name=mlflow_params["study_name"])
     study.optimize(objective, n_trials=mlflow_params["n_trials"])
-    
-    
+
+
 # Run on terminal after running the prelimainary_model.py file:
 # optuna-dashboard sqlite:///db.sqlite3 (be inside the src directory)
 # mlflow ui (be inside the src directory)
