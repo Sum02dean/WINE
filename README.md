@@ -42,6 +42,10 @@ mlflow ui
 ```
 
 Follow the link generated to track your model, performance stats, artifacts and pipelines.
+<p align="center">
+  <img src="optuna.png" width="800">
+</p>
+
 
 ## Optuna
 Similar to the above, open a new terminal <br/>
@@ -52,3 +56,8 @@ optuna-dashboard sqlite:///db.sqlite3
 ```
 
 Follow the link generated to track your study.
+
+
+<p align="center">
+  <img src="optuna.png" width="800">
+</p>
