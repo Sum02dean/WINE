@@ -7,7 +7,7 @@ on:
   push:
     branches: [ "dev" ]
     paths: 
-      - 'preliminary_model.py '
+      - 'preliminary_model.py'
       - 'linter.py'
       
   #pull_request:
