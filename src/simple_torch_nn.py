@@ -1,14 +1,14 @@
 from abc import abstractclassmethod, ABC
 from utils import BaseModel, MyDataset
 from torch.nn import CrossEntropyLoss, BCEWithLogitsLoss
+import pandas as pd
+import typing
+import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
 import torch.nn as nn
 import torch.nn.functional as F
-import typing
-import numpy as np
 from torch.nn.functional import one_hot
-import pandas as pd
 from sklearn.metrics import accuracy_score
 
 # Define simle adaptable neural network architecture

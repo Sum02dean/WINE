@@ -115,7 +115,7 @@ def objective(trial):
             # Build simple neural network by wrapping Pytorch API
             n_epochs=model_params['neural_network']['n_epochs']
             model = SimmpleNetModel(
-                in_dim=13, hidden_dims=nn_layer_nodes, final_dim=2, lr=nn_lr, epochs=n_epochs)
+                in_dim=13, hidden_dims=nn_layer_nodes, final_dim=2, learning_rate=nn_lr, epochs=n_epochs)
 
             # Transform data
             x_train, y_train = model.transform_data(train_x_raw, train_y_raw)

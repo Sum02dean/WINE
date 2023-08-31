@@ -9,7 +9,7 @@
         "project_name": "wine",
         "experiment_name": "wine",
         "run_name": "wine",
-        "study_name": "wine_all_models",
+        "study_name": "wine_all_models_v2",
         "tracking_uri": "http://localhost:5000",
         "mlflow_tracking_uri": "http://localhost:5000",
         "mlflow_server_uri": "http://localhost:5000",
