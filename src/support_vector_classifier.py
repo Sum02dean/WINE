@@ -17,7 +17,7 @@ class SVClassifier(BaseModel, ABC):
         self.model = self.init_model()
         super().__init__()
 
-    def fit(self, X, y) -> None:
+    def fit(self, x, y) -> None:
         """
         Fit the model to the training data and return the fitted model.
         
@@ -28,23 +28,38 @@ class SVClassifier(BaseModel, ABC):
         Returns:
             self: The fitted model.
         """
-        return self.model.fit(X, y)
+        return self.model.fit(x, y)
     
-    def predict(self, X) -> np.array:
+    def predict(self, x) -> np.array:
         """
         Predicts the output for a given input.
         """
-        return self.model.predict(X)
+        return self.model.predict(x)
     
     def init_model(self) -> sklearn.svm.SVC:
         """
         Initializes and returns a trained SVM model.
 
         Returns:
-            sklearn.svm.SVC: The trained svm Classifier model.
+            sklearn.svm.SVC: The svm Classifier model.
         """
         model = svm.SVC(C=self.C, gamma=self.gamma)
         return model
+
+    def transform_data(self, x: np.array, y: np.array) -> (np.array, np.array):
+        """
+        A method that reshapes or transforms the data.
+
+        Args:
+            x (array-like): The input data.
+            y (array-like): The target data.
+        Returns:
+            x (array-like): The reshaped input data.
+            y (array-like): The reshaped target data.
+        """
+        X = x.values
+        y = y.values.reshape(-1)
+        return X, y
     
  
 if __name__ == "__main__":

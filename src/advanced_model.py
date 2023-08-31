@@ -1,5 +1,8 @@
 import numpy as np
 import torch
+import json
+import optuna
+import mlflow
 import pandas as pd
 import sklearn
 import torch
@@ -14,6 +17,8 @@ from sklearn.metrics import roc_auc_score
 from sklearn.metrics import RocCurveDisplay
 import matplotlib.pyplot as plt
 from utils import MyDataset
+from simple_torch_nn import SimmpleNetModel
+import argparse
 
 # Set the device
 use_cuda = torch.cuda.is_available()
@@ -241,3 +246,49 @@ plt.ylabel("True Positive Rate")
 plt.title("Binary classification of wine quality")
 plt.legend()
 plt.show()
+
+
+
+# Run Main
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser()
+    # Read in the configs file
+    parser.add_argument("--config_file", help="path to configs file",
+                        type=str, default="WINE/configs/config_file.json")
+    args = parser.parse_args()
+
+    # Read in the parameters from configs file
+    configs = json.load(
+        open(
+            "/Users/sum02dean/projects/wine_challenge/WINE/configs/config_file.json",
+              encoding='utf-8'))
+
+
+    
+    # Extract parameters
+    mlflow_params = configs.get("mlflow_params")
+    model_params = configs.get("model_params")
+    data_params = configs.get("data_params")
+    
+    # Features
+    train_x_raw = pd.read_csv(data_params['x_train_path'])
+    test_x_raw  = pd.read_csv(data_params['x_test_path'])
+
+    # Labels
+    train_y_raw  = pd.read_csv(data_params['y_train_path'])
+    test_y_raw  = pd.read_csv(data_params['y_test_path'])
+    
+    # Create Optuna study
+    study = optuna.create_study(
+        storage=mlflow_params["storage"],
+        study_name=mlflow_params["study_name"], direction='maximize')
+
+    # Optimize
+    mlflow.set_experiment(experiment_name=mlflow_params["study_name"])
+    study.optimize(objective, n_trials=mlflow_params["n_trials"])
+
+
+# Run on terminal after running the prelimainary_model.py file:
+# optuna-dashboard sqlite:///db.sqlite3 (be inside the src directory)
+# mlflow ui (be inside the src directory)

@@ -11,6 +11,7 @@ import mlflow.sklearn
 from mlflow.models.signature import infer_signature
 from random_forest import RandomForest
 from support_vector_classifier import SVClassifier
+from simple_torch_nn import SimmpleNetModel
 
 # Establish mlflow logging config
 logging.basicConfig(level=logging.WARN)
@@ -30,23 +31,12 @@ def objective(trial):
 
     with mlflow.start_run(run_name=str(trial.number)):
 
-        # Features
-        train_x_raw = pd.read_csv(data_params['x_train_path'])
-        test_x_raw  = pd.read_csv(data_params['x_test_path'])
-
-        # Labels
-        train_y_raw  = pd.read_csv(data_params['y_train_path'])
-        test_y_raw  = pd.read_csv(data_params['y_test_path'])
-
         # Sample these classifiers
-        classifier_name = trial.suggest_categorical("classifier", ["SVC", "RandomForest"])
+        classifier_name = trial.suggest_categorical("classifier",
+                                                    ["SVC", "RandomForest", 'neural_network'])
 
         # Iterate over model specific hyper-parameters
         if classifier_name == "SVC":
-            print("Initializing model")
-            model = SVClassifier()
-            x_train, y_train = model.reshape_data(train_x_raw, train_y_raw)
-            x_test, y_test = model.reshape_data(test_x_raw , test_y_raw)
 
             # Define optimizable hyperparameters ranges: C
             lower_sample_c = model_params['svm']['c_lower_sample']
@@ -62,13 +52,15 @@ def objective(trial):
 
             svc_gamma = trial.suggest_float(
                 "svc_gamma", lower_sample_gamma, upper_sample_gamma, log=True)
-            classifier_obj = SVClassifier(C=svc_c, gamma=svc_gamma)
+            
+            # Build SVCClassifier by wrapping scikit-learn API
+            model = SVClassifier(C=svc_c, gamma=svc_gamma)
 
-        elif classifier_name == "RandomForest":
-            print("Initializing model")
-            model = RandomForest()
-            x_train, y_train = model.reshape_data(train_x_raw, train_y_raw)
-            x_test, y_test = model.reshape_data(test_x_raw , test_y_raw)
+            # Transform data
+            x_train, y_train = model.transform_data(train_x_raw, train_y_raw)
+            x_test, y_test = model.transform_data(test_x_raw , test_y_raw)
+
+        if classifier_name == "RandomForest":
 
             # Define optimizable hyperparameters ranges: max depth
             lower_sample_max_depth = model_params['random_forest']['max_depth_lower_sample']
@@ -84,7 +76,51 @@ def objective(trial):
 
             rf_n_estimators = trial.suggest_int("rf_n_estimators", lower_sample_n_estimators,
                                                 upper_sample_n_estimators, log=True)
-            classifier_obj = RandomForest(max_depth=rf_max_depth, n_estimators=rf_n_estimators)
+
+            # Build RandomForest by wrapping scikit-learn API
+            model = RandomForest(max_depth=rf_max_depth, n_estimators=rf_n_estimators)
+
+            # Transform data
+            x_train, y_train = model.transform_data(train_x_raw, train_y_raw)
+            x_test, y_test = model.transform_data(test_x_raw , test_y_raw)
+
+
+        if classifier_name == "neural_network":
+
+            # Define optimizable hyperparameters ranges: n_layers
+            lower_sample_n_layers = model_params['neural_network']['n_layers_lower_sample']
+            upper_sample_n_layers = model_params['neural_network']['n_layers_upper_sample']
+
+            # Define optimizable hyperparater ranges: n_nodes
+            lower_sample_n_nodes = model_params['neural_network']['n_nodes_lower_sample']
+            upper_sample_n_nodes = model_params['neural_network']['n_nodes_upper_sample']
+
+            # Define optimizable hyperparater ranges: lr
+            lower_sample_lr = model_params['neural_network']['lr_lower_sample']
+            upper_sample_lr = model_params['neural_network']['lr_upper_sample']
+
+
+            # Bayesian search over sampled space
+            nn_number_layers = trial.suggest_int("nn_layers", lower_sample_n_layers,
+                                             upper_sample_n_layers, log=False)
+
+            nn_layer_nodes = tuple([
+                trial.suggest_int(f"layer_{i}_nodes", lower_sample_n_nodes,
+                                  upper_sample_n_nodes, log=False)
+                                  for i in range(nn_number_layers)])
+
+            nn_lr = trial.suggest_float("lr", lower_sample_lr,
+                                             upper_sample_lr, log=True)
+
+            # Build simple neural network by wrapping Pytorch API
+            n_epochs=model_params['neural_network']['n_epochs']
+            model = SimmpleNetModel(
+                in_dim=13, hidden_dims=nn_layer_nodes, final_dim=2, lr=nn_lr, epochs=n_epochs)
+
+            # Transform data
+            x_train, y_train = model.transform_data(train_x_raw, train_y_raw)
+            x_test, y_test = model.transform_data(test_x_raw , test_y_raw)
+
 
         # Predict on the train set
         predictions = model.fit_predict(x_train, y_train, x_test)
@@ -95,7 +131,8 @@ def objective(trial):
         mlflow.log_artifacts('/Users/sum02dean/projects/wine_challenge/WINE/data')
         mlflow.log_params(trial.params)
         mlflow.log_metric('test_accuracy', test_acc)
-        mlflow.sklearn.log_model(classifier_obj, classifier_name, signature=signature)
+        mlflow.sklearn.log_model(model, classifier_name, signature=signature)
+
     return test_acc
 
 # Run Main
@@ -103,20 +140,26 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     # Read in the configs file
-    parser.add_argument("--config_file", help="path to configs file",
-                        type=str, default="WINE/configs/config_file.json")
+    FILE_NAME = "/Users/sum02dean/projects/wine_challenge/WINE/configs/config_file.json"
+    parser.add_argument("--config_file", help="path to configs file", type=str, default=FILE_NAME)
     args = parser.parse_args()
 
     # Read in the parameters from configs file
-    configs = json.load(
-        open(
-            "/Users/sum02dean/projects/wine_challenge/WINE/configs/config_file.json",
-              encoding='utf-8'))
+    with open(args.config_file, encoding='utf-8') as f:
+        configs = json.load(f)
 
     # Extract parameters
     mlflow_params = configs.get("mlflow_params")
     model_params = configs.get("model_params")
     data_params = configs.get("data_params")
+
+    # Features
+    train_x_raw = pd.read_csv(data_params['x_train_path'])
+    test_x_raw  = pd.read_csv(data_params['x_test_path'])
+
+    # Labels
+    train_y_raw  = pd.read_csv(data_params['y_train_path'])
+    test_y_raw  = pd.read_csv(data_params['y_test_path'])
 
     # Create Optuna study
     study = optuna.create_study(
@@ -126,7 +169,6 @@ if __name__ == "__main__":
     # Optimize
     mlflow.set_experiment(experiment_name=mlflow_params["study_name"])
     study.optimize(objective, n_trials=mlflow_params["n_trials"])
-
 
 # Run on terminal after running the prelimainary_model.py file:
 # optuna-dashboard sqlite:///db.sqlite3 (be inside the src directory)
