@@ -1,6 +1,6 @@
-import pandas as pd
 import typing
 import numpy as np
+import pandas as pd
 from abc import ABC
 from utils import BaseModel, MyDataset
 import torch
@@ -94,7 +94,7 @@ class SimmpleNetModel(BaseModel, ABC):
         for _, _ in enumerate(range(self.max_epochs)):
 
             # Training
-            for i, data in enumerate(self.train_loader):
+            for _, data in enumerate(self.train_loader):
 
                 # Get the inputs & labels
                 batch, labels = data
@@ -119,7 +119,6 @@ class SimmpleNetModel(BaseModel, ABC):
 
                 # Adjust learning weights
                 self.optimiser.step()
-                
 
     def predict(self, x: np.array) -> torch.Tensor:
         """
@@ -156,7 +155,7 @@ class SimmpleNetModel(BaseModel, ABC):
                 all_logits.append(logits)
 
         all_predictions = np.array([item for sublist in preds for item in sublist])
-        return predictions
+        return all_predictions
 
     def init_model(self) -> nn.Module:
         """
