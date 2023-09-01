@@ -14,6 +14,7 @@
 #     branches: ["dev", "main"]
 #     paths: 
 #       - 'preliminary_model.py'
+#       - 'src/preliminary_model.py'
 #       - 'linter.py'
       
 #   #pull_request:
@@ -53,6 +54,9 @@ on:
     paths: 
       - 'src/preliminary_model.py'
       - 'src/linter.py'
+      - 'src/random_forest.py'
+      - 'src/support_vector_classifier.py'
+      - 'src/simple_torch.py'
 
 permissions:
   contents: read

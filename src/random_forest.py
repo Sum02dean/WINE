@@ -1,9 +1,8 @@
 """ Random forest classifier model"""
 import sklearn
 import numpy as np
-from abc import abstractmethod, ABC
+from abc import ABC
 from utils import BaseModel
-from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
 
@@ -16,12 +15,12 @@ class RandomForest(BaseModel, ABC):
         self.model = self.init_model()
         super().__init__()
 
-    def fit(self, x, y) -> None:
+    def fit(self, x: np.array, y: np.array) -> sklearn.ensemble.RandomForestClassifier:
         """
         Fit the model to the training data and return the fitted model.
         
         Parameters:
-            X (array-like): The training input samples.
+            x (array-like): The training input samples.
             y (array-like): The target values.
             
         Returns:
@@ -34,7 +33,7 @@ class RandomForest(BaseModel, ABC):
         Predicts the output for a given input.
 
         Parameters:
-            X (array-like): The input data for which the output needs to be predicted.
+            x (array-like): The input data for which the output needs to be predicted.
 
         Returns:
             array-like: The predicted output for the given input data.
@@ -64,8 +63,8 @@ class RandomForest(BaseModel, ABC):
             y (array-like): The reshaped target data.
         """
          
-        x = x.values
-        y = y.values.reshape(-1)
+        x = x.to_numpy()
+        y = y.to_numpy().reshape(-1)
         return x, y
     
 if __name__ == "__main__":
@@ -81,8 +80,8 @@ if __name__ == "__main__":
     print("Initializing model")
     model = RandomForest()
     
-    X_train, y_train = model.reshape_data(train_x_raw, train_y_raw )
-    X_test, y_test = model.reshape_data(test_x_raw , test_y_raw )
+    X_train, y_train = model.transform_data(train_x_raw, train_y_raw )
+    X_test, y_test = model.transform_data(test_x_raw , test_y_raw )
 
     predictions = model.fit_predict(X_train, y_train, X_test)
     accuracy = model.report_accuracy(y_test, predictions)

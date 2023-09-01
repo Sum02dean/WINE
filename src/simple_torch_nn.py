@@ -10,7 +10,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.functional import one_hot
 from sklearn.metrics import accuracy_score
-
 # Define simle adaptable neural network architecture
 class SimpleNetwork(nn.Module):
     """A simple neural network"""
@@ -90,6 +89,7 @@ class SimmpleNetModel(BaseModel, ABC):
         for _, epoch in enumerate(range(self.max_epochs)):
             
             # Training
+            writer = SummaryWriter()
             for i, data in enumerate(self.train_loader):
                 
                 # Get the inputs & labels
