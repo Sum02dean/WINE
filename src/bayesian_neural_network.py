@@ -32,7 +32,7 @@ class ParameterDistribution(torch.nn.Module, metaclass=abc.ABCMeta):
     def sample(self) -> torch.Tensor:
         """
         Sample from this distribution.
-        :return: Sample from this distribution. The sample shape depends on your semantics.
+        :return: Sample from this distribution.
         """
         pass
 
