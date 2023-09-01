@@ -62,7 +62,7 @@ class SimmpleNetModel(BaseModel, ABC):
         self.final_dim = final_dim
         self.model = self.init_model()
 
-        # Data loader aargs
+        # Data loader args
         self.train_loader = None
         self.test_loader = None
 
