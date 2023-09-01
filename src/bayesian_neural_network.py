@@ -39,7 +39,6 @@ class ParameterDistribution(torch.nn.Module, metaclass=abc.ABCMeta):
     def forward(self, values: torch.Tensor) -> torch.Tensor:
         """Legacy method."""
         # DO NOT USE THIS METHOD
-        # We only implement it since torch.nn.Module requires a forward method
         warnings.warn('ParameterDistribution should not be called! Use its explicit methods!')
         return self.log_likelihood(values)
 
