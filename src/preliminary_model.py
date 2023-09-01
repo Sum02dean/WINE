@@ -52,7 +52,7 @@ def objective(trial):
 
             svc_gamma = trial.suggest_float(
                 "svc_gamma", lower_sample_gamma, upper_sample_gamma, log=True)
-            
+
             # Build SVCClassifier by wrapping scikit-learn API
             model = SVClassifier(C=svc_c, gamma=svc_gamma)
 
@@ -84,7 +84,6 @@ def objective(trial):
             x_train, y_train = model.transform_data(train_x_raw, train_y_raw)
             x_test, y_test = model.transform_data(test_x_raw , test_y_raw)
 
-
         if classifier_name == "neural_network":
 
             # Define optimizable hyperparameters ranges: n_layers
@@ -115,13 +114,12 @@ def objective(trial):
             # Build simple neural network by wrapping Pytorch API
             n_epochs=model_params['neural_network']['n_epochs']
             model = SimmpleNetModel(
-                in_dim=13, hidden_dims=nn_layer_nodes, final_dim=2, learning_rate=nn_lr, epochs=n_epochs)
+                in_dim=13, hidden_dims=nn_layer_nodes, final_dim=2, 
+                learning_rate=nn_lr, epochs=n_epochs)
 
             # Transform data
             x_train, y_train = model.transform_data(train_x_raw, train_y_raw)
             x_test, y_test = model.transform_data(test_x_raw , test_y_raw)
-
-
         # Predict on the train set
         predictions = model.fit_predict(x_train, y_train, x_test)
         test_acc = accuracy_score(y_test, predictions)

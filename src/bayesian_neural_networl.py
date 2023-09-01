@@ -411,6 +411,5 @@ class Model(object):
         output = np.concatenate(probability_batches, axis=0)
         output_pred_dist = predictive_probability_dist_batches
         assert isinstance(output, np.ndarray)
-        # assert output.ndim == 2 and output.shape[1] == 10
         assert np.allclose(np.sum(output, axis=1), 1.0)
         return output, output_pred_dist
