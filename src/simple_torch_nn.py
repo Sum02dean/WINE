@@ -95,7 +95,7 @@ class SimmpleNetModel(BaseModel, ABC):
             # Training
             for _, data in enumerate(self.train_loader):
 
-                # Get the inputs & labels
+                # Get the input & labels
                 batch, labels = data
 
                 # Convert the data-types
