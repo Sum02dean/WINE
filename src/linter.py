@@ -7,7 +7,7 @@ THRESHOLD = 8
 files_to_lint = [
     "preliminary_model.py",
     "simple_torch_nn.py",
-    #"random_forest.py",
+    "random_forest.py",
    # "support_vector_classifier.py"
 ]
 
