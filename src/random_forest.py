@@ -46,8 +46,9 @@ class RandomForest(BaseModel, ABC):
         Returns:
             sklearn.ensemble.RandomForestClassifier: The trained Random Forest Classifier model.
         """
-        model = RandomForestClassifier(max_depth=self.max_depth, n_estimators=self.n_estimators)
-        return model
+        rf_model = RandomForestClassifier(max_depth=self.max_depth, n_estimators=self.n_estimators)
+        return rf_model
+
 
     def transform_data(self, x: np.array, y: np.array) -> (np.array, np.array):
         """
