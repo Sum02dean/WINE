@@ -1,5 +1,5 @@
 """ Runs a Bayesian hyperparameter optimisation search using Optuna
-to train and predict on a classicifation problem set. """
+to train and predict on a classicifation problem set."""
 import json
 import logging
 import argparse
