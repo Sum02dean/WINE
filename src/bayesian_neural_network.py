@@ -32,13 +32,12 @@ class ParameterDistribution(torch.nn.Module, metaclass=abc.ABCMeta):
     def sample(self) -> torch.Tensor:
         """
         Sample from this distribution.
-        Note that you only need to implement this method for variational posteriors, not priors.
-
         :return: Sample from this distribution. The sample shape depends on your semantics.
         """
         pass
 
     def forward(self, values: torch.Tensor) -> torch.Tensor:
+        """Legacy method."""
         # DO NOT USE THIS METHOD
         # We only implement it since torch.nn.Module requires a forward method
         warnings.warn('ParameterDistribution should not be called! Use its explicit methods!')
@@ -214,8 +213,7 @@ class BayesianLayer(nn.Module):
         assert any(True for _ in self.weights_var_posterior.parameters()), 'Weight posterior must have parameters'
 
         if self.use_bias:
-            # Initialize bias with zero mean and with parameterised std - samples n times where n=out_features
-            # ... each layer has out_features weights
+            # Initialize bias with zero mean and with parameterised std 
             b_mu_init = Normal(torch.tensor(0.), std_mu_init).sample((out_features,))
             b_rho_init = Normal(torch.tensor(0.), std_rho_init).sample((out_features,))
 
@@ -353,7 +351,6 @@ class Model(object):
         for _ in progress_bar:
             num_batches = len(train_loader)
             for batch_idx, (batch_x, batch_y) in enumerate(train_loader):
-                # batch_x are of shape (batch_size, 13), batch_y are of shape (batch_size,)
                 # Convert the data-types
                 batch_x = torch.FloatTensor(batch_x)
                 self.network.zero_grad()
