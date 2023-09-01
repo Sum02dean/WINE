@@ -5,25 +5,26 @@ import numpy as np
 import torch
 
 class BaseModel(ABC):
-
+    """A base model to implement a machine learning model
+    """
     @abstractmethod
     def init_model(self) -> None:
         """
         Initializes the model.
         """
         pass
-    
+
     @abstractmethod
     def fit(self, x, y) -> None:
         pass
-    
+
     @abstractmethod
     def predict(self, x) -> np.array:
         """
         Predicts the output for a given input.
         """
         pass
-    
+
     @abstractmethod
     def transform_data(self, x, y) -> None:
         """
@@ -34,17 +35,17 @@ class BaseModel(ABC):
     def fit_predict(self, x, y, x_val) -> None:
         self.fit(x, y)
         return self.predict(x_val)
-    
+
     def report_accuracy(self, y_true, y_pred) -> float:
         test_acc = accuracy_score(y_true, y_pred)
-        return test_acc 
-    
+        return test_acc
 
 class MyDataset(torch.utils.data.Dataset):
+    """Custom DataSet class for Pytorch models"""
     def __init__(self, features, labels=None):
         self.labels = labels
         self.features = features
-    
+
     def __len__(self):
         'Denotes the total number of samples'
         return np.shape(self.features)[0]

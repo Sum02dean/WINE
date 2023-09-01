@@ -10,6 +10,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.functional import one_hot
 from sklearn.metrics import accuracy_score
+
 # Define simle adaptable neural network architecture
 class SimpleNetwork(nn.Module):
     """A simple neural network"""
@@ -89,7 +90,6 @@ class SimmpleNetModel(BaseModel, ABC):
         for _, epoch in enumerate(range(self.max_epochs)):
             
             # Training
-            writer = SummaryWriter()
             for i, data in enumerate(self.train_loader):
                 
                 # Get the inputs & labels
@@ -122,8 +122,6 @@ class SimmpleNetModel(BaseModel, ABC):
                     last_loss = running_loss / 1000 # loss per batch
                     print('  batch {} loss: {}'.format(i + 1, last_loss))
                     running_loss = 0.
-
-
 
     def predict(self, x: np.array) -> torch.Tensor:
         """
@@ -160,7 +158,6 @@ class SimmpleNetModel(BaseModel, ABC):
 
         predictions = np.array([item for sublist in preds for item in sublist])
         return predictions
-
 
     def init_model(self) -> nn.Module:
         """

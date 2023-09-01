@@ -27,7 +27,7 @@ class RandomForest(BaseModel, ABC):
             self: The fitted model.
         """
         return  self.model.fit(x, y)
-    
+
     def predict(self, x: np.array) -> np.array:
         """
         Predicts the output for a given input.
@@ -39,8 +39,7 @@ class RandomForest(BaseModel, ABC):
             array-like: The predicted output for the given input data.
         """
         return self.model.predict(x)
-    
-    
+
     def init_model(self) -> sklearn.ensemble.RandomForestClassifier:
         """
         Initializes and returns a trained Random Forest Classifier model.
@@ -50,7 +49,7 @@ class RandomForest(BaseModel, ABC):
         """
         model = RandomForestClassifier(max_depth=self.max_depth, n_estimators=self.n_estimators)
         return model
-    
+
     def transform_data(self, x: np.array, y: np.array) -> (np.array, np.array):
         """
         A method that reshapes the data.
@@ -66,7 +65,7 @@ class RandomForest(BaseModel, ABC):
         x = x.to_numpy()
         y = y.to_numpy().reshape(-1)
         return x, y
-    
+
 if __name__ == "__main__":
 
     # Features
