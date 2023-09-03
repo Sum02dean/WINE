@@ -148,13 +148,10 @@ class SimmpleNetModel(BaseModel, ABC):
             with torch.no_grad():
                 logits = self.model(batch)
                 rounded_logits = torch.where(logits > 0.5, 1, 0)
-                preds = [np.argmax(x) for x in rounded_logits.detach().numpy()]
-                logits = [x[1] for x in logits.detach().numpy()]
-                all_predictions.append(preds)
+                all_predictions.append(rounded_logits)
                 all_logits.append(logits)
-
-        all_predictions = np.array([item for sublist in preds for item in sublist])
-        return all_predictions
+        all_predictions = np.concatenate(all_predictions)
+        return np.array(all_predictions)
 
     def init_model(self) -> nn.Module:
         """
@@ -167,5 +164,6 @@ class SimmpleNetModel(BaseModel, ABC):
         """
         A method that reshapes or transforms the data.
         """
-        ohe_y = one_hot(torch.tensor(y.values)).numpy()
-        return x, ohe_y.squeeze(1)
+        y = one_hot(torch.tensor(y.values)).numpy()
+        y = y.squeeze(1)
+        return x, y

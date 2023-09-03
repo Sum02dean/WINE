@@ -9,7 +9,7 @@
         "project_name": "wine",
         "experiment_name": "wine",
         "run_name": "wine",
-        "study_name": "wine_all_models_v2",
+        "study_name": "wine_all_models_v13",
         "tracking_uri": "http://localhost:5000",
         "mlflow_tracking_uri": "http://localhost:5000",
         "mlflow_server_uri": "http://localhost:5000",
@@ -35,10 +35,10 @@
             "n_epochs": 200,
             "n_layers_lower_sample": 2,
             "n_layers_upper_sample": 4,
-            "n_nodes_lower_sample": 100,
+            "n_nodes_lower_sample": 50,
             "n_nodes_upper_sample": 500,
-            "lr_lower_sample": 0.0002,
-            "lr_upper_sample": 0.02}
+            "lr_lower_sample": 0.02,
+            "lr_upper_sample": 0.2}
 
 
         }

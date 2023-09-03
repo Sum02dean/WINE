@@ -339,7 +339,7 @@ class Model(object):
         :param dataset: Dataset you should use for training
         """
 
-        train_loader = torch.utils.data.DataLoader(
+        data_loader = torch.utils.data.DataLoader(
             dataset, batch_size=self.batch_size, shuffle=True, drop_last=True
         )
 
@@ -348,8 +348,8 @@ class Model(object):
 
         progress_bar = trange(self.num_epochs)
         for _ in progress_bar:
-            num_batches = len(train_loader)
-            for batch_idx, (batch_x, batch_y) in enumerate(train_loader):
+            num_batches = len(data_loader)
+            for batch_idx, (batch_x, batch_y) in enumerate(data_loader):
                 # Convert the data-types
                 batch_x = torch.FloatTensor(batch_x)
                 self.network.zero_grad()
@@ -384,15 +384,18 @@ class Model(object):
                     current_accuracy = (current_logits.argmax(axis=1) == batch_y).float().mean()
                     progress_bar.set_postfix(loss=loss.item(), acc=current_accuracy.item())
 
-    def predict(self, data_loader: torch.utils.data.DataLoader) -> np.ndarray:
+    def predict(self, dataset: torch.utils.data.Dataset) -> np.ndarray:
         """
         Predict the class probabilities for the given data
         :param data_loader: Data loader yielding the samples to predict on
         :return: (num_samples, 10) NumPy float array where the second dimension sums up to 1 for each row
         """
 
+        # Instantaite the data loader
+        data_loader = torch.utils.data.DataLoader(
+            dataset, batch_size=self.batch_size, shuffle=True, drop_last=True
+        )
         self.network.eval()
-
         probability_batches = []
         predictive_probability_dist_batches = []
         for batch_x, _ in data_loader:
@@ -409,3 +412,19 @@ class Model(object):
         assert isinstance(output, np.ndarray)
         assert np.allclose(np.sum(output, axis=1), 1.0)
         return output, output_pred_dist
+    
+
+    def fit_predict(self, dataset: torch.utils.data.Dataset) -> (np.ndarray, np.ndarray):
+        """Combines fit and predict functions
+
+        Args:
+            dataset (torch.utils.data.Dataset): Dataset object from pytorch
+
+        Returns:
+            (np.ndarray, np.ndarray): The MLE and predictive distribution
+        """
+        self.fit(dataset)
+        return self.predict(dataset)
+    
+if __name__ == '__main__':
+    pass

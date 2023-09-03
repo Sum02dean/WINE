@@ -2,6 +2,7 @@
 to train and predict on a classicifation problem set."""
 import json
 import logging
+import numpy as np
 import argparse
 import pandas as pd
 from sklearn.metrics import accuracy_score
@@ -33,7 +34,7 @@ def objective(trial):
 
         # Sample these classifiers
         classifier_name = trial.suggest_categorical("classifier",
-                                                    ["SVC", "RandomForest", 'neural_network'])
+                                                    ['neural_network', 'RandomForest', 'SVC'])
 
         # Iterate over model specific hyper-parameters
         if classifier_name == "SVC":
@@ -114,16 +115,17 @@ def objective(trial):
             # Build simple neural network by wrapping Pytorch API
             n_epochs=model_params['neural_network']['n_epochs']
             model = SimmpleNetModel(
-                in_dim=13, hidden_dims=nn_layer_nodes, final_dim=2, 
+                in_dim=13, hidden_dims=nn_layer_nodes, final_dim=2,
                 learning_rate=nn_lr, epochs=n_epochs)
 
             # Transform data
             x_train, y_train = model.transform_data(train_x_raw, train_y_raw)
             x_test, y_test = model.transform_data(test_x_raw , test_y_raw)
+        
         # Predict on the train set
         predictions = model.fit_predict(x_train, y_train, x_test)
         test_acc = accuracy_score(y_test, predictions)
-
+        
         # Log artifcats
         signature = infer_signature(predictions, predictions)
         mlflow.log_artifacts('/Users/sum02dean/projects/wine_challenge/WINE/data')
