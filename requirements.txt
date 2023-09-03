@@ -1,30 +1,30 @@
-absl-py @ file:///home/conda/feedstock_root/build_artifacts/absl-py_1673535674859/work
-aiohttp @ file:///Users/cbousseau/work/recipes/ci_py311/aiohttp_1677926054700/work
-aiosignal @ file:///home/conda/feedstock_root/build_artifacts/aiosignal_1667935791922/work
+absl-py==1.4.0
+aiohttp==3.8.3
+aiosignal==1.3.1
 alembic==1.11.1
 appnope==0.1.3
 arviz==0.16.1
 astroid==2.15.6
 asttokens==2.2.1
 async-timeout==4.0.2
-attrs @ file:///home/conda/feedstock_root/build_artifacts/attrs_1683424013410/work
+attrs==23.1.0
 backcall==0.2.0
 bleach==6.0.0
-blinker @ file:///home/conda/feedstock_root/build_artifacts/blinker_1681349778161/work
+blinker==1.6.2
 bottle==0.12.25
 brotlipy==0.7.0
-cachetools @ file:///home/conda/feedstock_root/build_artifacts/cachetools_1688227447901/work
+cachetools==5.3.1
 certifi==2023.7.22
-cffi @ file:///Users/cbousseau/work/recipes/ci_py311/cffi_1677903595907/work
+cffi==1.15.1
 chardet==5.2.0
-charset-normalizer @ file:///tmp/build/80754af9/charset-normalizer_1630003229654/work
+charset-normalizer==2.0.4
 click==8.1.4
 cloudpickle==2.2.1
 cmaes==0.9.1
 colorlog==6.7.0
 comm==0.1.3
 contourpy==1.1.0
-cryptography @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_a3xvfhudbc/croot/cryptography_1689373681671/work
+cryptography==41.0.2
 cycler==0.11.0
 databricks-cli==0.17.7
 datasets==2.13.1
@@ -44,16 +44,16 @@ fsspec==2023.6.0
 future==0.18.3
 gitdb==4.0.10
 GitPython==3.1.32
-google-auth @ file:///home/conda/feedstock_root/build_artifacts/google-auth_1689110070807/work
-google-auth-oauthlib @ file:///home/conda/feedstock_root/build_artifacts/google-auth-oauthlib_1688235217226/work
-grpcio @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_7angouv034/croot/grpc-suite_1685746858653/work
+google-auth==2.22.0
+google-auth-oauthlib==1.0.0
+grpcio==1.48.2
 gunicorn==21.2.0
 h5netcdf==1.2.0
 h5py==3.9.0
 huggingface-hub==0.16.4
 hyperopt==0.2.7
-idna @ file:///home/conda/feedstock_root/build_artifacts/idna_1663625384323/work
-importlib-metadata @ file:///home/conda/feedstock_root/build_artifacts/importlib-metadata_1688754491823/work
+idna==3.4
+importlib-metadata==6.8.0
 iniconfig==2.0.0
 ipykernel==6.24.0
 ipython==8.14.0
@@ -79,8 +79,8 @@ multidict==6.0.4
 multiprocess==0.70.14
 nest-asyncio==1.5.6
 networkx==3.1
-numpy @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_a19y8c22jc/croot/numpy_and_numpy_base_1691091616945/work
-oauthlib @ file:///home/conda/feedstock_root/build_artifacts/oauthlib_1666056362788/work
+numpy==1.25.2
+oauthlib==3.2.2
 optuna==3.2.0
 optuna-dashboard==0.10.3
 packaging==23.1
@@ -90,6 +90,7 @@ patsy==0.5.3
 pexpect==4.8.0
 pickleshare==0.7.5
 Pillow==10.0.0
+pip==23.1.2
 pipreqs==0.4.13
 platformdirs==3.8.1
 pluggy==1.3.0
@@ -102,38 +103,39 @@ py4j==0.10.9.7
 pyarrow==12.0.1
 pyasn1==0.4.8
 pyasn1-modules==0.2.7
-pycparser @ file:///home/conda/feedstock_root/build_artifacts/pycparser_1636257122734/work
+pycparser==2.21
 Pygments==2.15.1
-PyJWT @ file:///home/conda/feedstock_root/build_artifacts/pyjwt_1689721553971/work
+PyJWT==2.8.0
 pylint==2.17.5
 pymc3==3.11.4
-pyOpenSSL @ file:///home/conda/feedstock_root/build_artifacts/pyopenssl_1685514481738/work
+pyOpenSSL==23.2.0
 pyparsing==3.0.9
-PySocks @ file:///home/conda/feedstock_root/build_artifacts/pysocks_1661604839144/work
+PySocks==1.7.1
 pytest==7.4.0
 python-dateutil==2.8.2
 python-slugify==8.0.1
 pytz==2023.3
-pyu2f @ file:///home/conda/feedstock_root/build_artifacts/pyu2f_1604248910016/work
+pyu2f==0.1.5
 PyYAML==6.0
 pyzmq==25.1.0
 querystring-parser==1.2.4
-requests @ file:///home/conda/feedstock_root/build_artifacts/requests_1684774241324/work
-requests-oauthlib @ file:///home/conda/feedstock_root/build_artifacts/requests-oauthlib_1643557462909/work
-rsa @ file:///home/conda/feedstock_root/build_artifacts/rsa_1658328885051/work
+requests==2.31.0
+requests-oauthlib==1.3.1
+rsa==4.9
 scikit-learn==1.3.0
 scipy==1.11.1
 seaborn==0.12.2
 semver==3.0.1
-six @ file:///home/conda/feedstock_root/build_artifacts/six_1620240208055/work
+setuptools==67.8.0
+six==1.16.0
 smmap==5.0.0
 SQLAlchemy==2.0.18
 sqlparse==0.4.4
 stack-data==0.6.2
 sympy==1.12
 tabulate==0.9.0
-tensorboard @ file:///home/conda/feedstock_root/build_artifacts/tensorboard_1691595541663/work/tensorboard-2.14.0-py3-none-any.whl#sha256=3667f9745d99280836ad673022362c840f60ed8fefd5a3e30bf071f5a8fd0017
-tensorboard-data-server @ file:///var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_ffpjrdrqhx/croot/tensorboard-data-server_1681498215078/work/tensorboard_data_server-0.7.0-py3-none-macosx_11_0_arm64.whl
+tensorboard==2.14.0
+tensorboard-data-server==0.7.0
 text-unidecode==1.3
 Theano-PyMC==1.1.2
 threadpoolctl==3.1.0
@@ -145,17 +147,18 @@ torchvision==0.15.2
 tornado==6.3.2
 tqdm==4.65.0
 traitlets==5.9.0
-typing_extensions @ file:///home/conda/feedstock_root/build_artifacts/typing_extensions_1688315532570/work
+typing_extensions==4.7.1
 tzdata==2023.3
-urllib3 @ file:///home/conda/feedstock_root/build_artifacts/urllib3_1678635778344/work
+urllib3==1.26.15
 wcwidth==0.2.6
 webencodings==0.5.1
 websocket-client==1.6.1
 Werkzeug==2.3.7
+wheel==0.38.4
 wrapt==1.15.0
 xarray==2023.8.0
 xarray-einstats==0.6.0
 xxhash==3.2.0
 yarg==0.1.9
-yarl @ file:///Users/cbousseau/work/recipes/ci_py311/yarl_1677926011607/work
+yarl==1.8.1
 zipp==3.16.1
