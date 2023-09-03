@@ -1,4 +1,5 @@
 """ Bayesian based neural network """
+from abc import ABC
 import warnings
 import typing
 import abc
@@ -9,6 +10,7 @@ import torch.optim
 from torch import nn
 from torch.nn import functional as F
 from torch.distributions import Normal
+from utils import BaseModel
 
 class ParameterDistribution(torch.nn.Module, metaclass=abc.ABCMeta):
     """
@@ -41,7 +43,6 @@ class ParameterDistribution(torch.nn.Module, metaclass=abc.ABCMeta):
         # DO NOT USE THIS METHOD
         warnings.warn('ParameterDistribution should not be called! Use its explicit methods!')
         return self.log_likelihood(values)
-
 class MyDataset(torch.utils.data.Dataset):
     """Custom DataSet class for Pytorch models"""
     def __init__(self, features, labels=None):
@@ -61,7 +62,6 @@ class MyDataset(torch.utils.data.Dataset):
         else:
             y = x
         return x, y
-
 class MultivariateDiagonalGaussian(ParameterDistribution):
     """
     Multivariate diagonal Gaussian distribution,
@@ -86,7 +86,6 @@ class MultivariateDiagonalGaussian(ParameterDistribution):
     def sample(self) -> torch.Tensor:
         epsilon = torch.distributions.Normal(0,1).sample(self.rho.size())
         return self.mu + self.sig*epsilon
-
 class GaussianMixturePrior(ParameterDistribution):
     """
     Mixture of two Gaussian distributions as described in Bludell et al., 2015.
@@ -112,7 +111,6 @@ class GaussianMixturePrior(ParameterDistribution):
             return Normal(loc=self.mu_0, scale=self.sigma_0).sample()
         else:
             return Normal(loc=self.mu_1, scale=self.sigma_1).sample()
-
 class BayesMultiLoss():
 
     """ Computes the KLD + NLL multi-objective loss. KLD is computed as mean of n-bathches.
@@ -155,7 +153,6 @@ class BayesMultiLoss():
         nll = self.__compute_nll_loss()
         multi_loss = kld + nll
         return multi_loss
-
 class BayesianLayer(nn.Module):
     """
     Module implementing a single Bayesian feedforward layer.
@@ -249,7 +246,6 @@ class BayesianLayer(nn.Module):
             bias = None
         # Compute the predictive outputs
         return F.linear(inputs, weights, bias), log_prior, log_variational_posterior
-
 class BayesNet(nn.Module):
     """
     Module implementing a Bayesian feedforward neural network using BayesianLayer objects.
@@ -312,33 +308,38 @@ class BayesNet(nn.Module):
         assert torch.allclose(torch.sum(estimated_probability, dim=1), torch.tensor(1.0)) # Make sure the probabilities add up to 1
         return estimated_probability, probability_samples
 
-class Model(object):
+class BayesModel(object):
     """
     BNN using Bayes by backprop
     """
 
-    def __init__(self):
+    def __init__(self, in_dim: int,  hidden_dims: typing.Tuple[int, ...],
+                 final_dim: int, learning_rate: float, epochs: int, n_mcs: int):
         # Hyperparameters and general parameters
-        self.num_epochs = 1000  # number of training epochs
+        self.num_epochs = epochs  # number of training epochs
         self.batch_size = 128  # training batch size
-        learning_rate = 1e-2  # training learning rates
-        hidden_layers = (100, 100)  # for each entry, creates a hidden layer with the corresponding number of units
+        self.learning_rate = learning_rate # training learning rates
+        self.in_dim = in_dim
+        self.hidden_layers = hidden_dims  # for each entry, creates a hidden layer with the corresponding number of units
         self.print_interval = 100  # number of batches until updated metrics are displayed during training
-        self.n_mcs = 1 # Number of monte-carlo samples
+        self.n_mcs = n_mcs # Number of monte-carlo samples
+        self.out_features = final_dim
+        super().__init__()
 
         # BayesNet
         print('Using a BayesNet model')
-        self.network = BayesNet(in_features=13, hidden_features=hidden_layers, out_features=2)
+        self.network = BayesNet(in_features=self.in_dim, hidden_features=self.hidden_layers,
+                                out_features=self.out_features)
 
         # Optimizer for training
-        self.optimizer = torch.optim.Adam(self.network.parameters(), lr=learning_rate)
+        self.optimizer = torch.optim.Adam(self.network.parameters(), lr=self.learning_rate)
 
-    def fit(self, dataset: torch.utils.data.Dataset):
+    def fit(self,  x: np.array, y: np.array) -> None:
         """
         Train the neural network.
         :param dataset: Dataset you should use for training
         """
-
+        dataset = MyDataset(features=x, labels=y)
         data_loader = torch.utils.data.DataLoader(
             dataset, batch_size=self.batch_size, shuffle=True, drop_last=True
         )
@@ -351,7 +352,6 @@ class Model(object):
             num_batches = len(data_loader)
             for batch_idx, (batch_x, batch_y) in enumerate(data_loader):
                 # Convert the data-types
-                batch_x = torch.FloatTensor(batch_x)
                 self.network.zero_grad()
 
                 # BayesNet training step via Bayes by backprop
@@ -363,7 +363,7 @@ class Model(object):
                     outputs, log_prior, log_posterior = current_logits
 
                     # Compute the losses
-                    batch_size = train_loader.batch_size
+                    batch_size = data_loader.batch_size
                     BML = BayesMultiLoss(net_outputs=outputs, targets=batch_y,
                                             log_posterior=log_posterior, log_prior=log_prior,
                                             batch_size=batch_size, num_batches=num_batches, method='approx')
@@ -374,7 +374,6 @@ class Model(object):
                 loss = loss/self.n_mcs
                 loss.backward()
 
-
                 # Step the gradients
                 self.optimizer.step()
 
@@ -384,7 +383,7 @@ class Model(object):
                     current_accuracy = (current_logits.argmax(axis=1) == batch_y).float().mean()
                     progress_bar.set_postfix(loss=loss.item(), acc=current_accuracy.item())
 
-    def predict(self, dataset: torch.utils.data.Dataset) -> np.ndarray:
+    def predict(self, x: np.array) -> np.ndarray:
         """
         Predict the class probabilities for the given data
         :param data_loader: Data loader yielding the samples to predict on
@@ -392,29 +391,44 @@ class Model(object):
         """
 
         # Instantaite the data loader
+        dataset = MyDataset(features=x, labels=None)
         data_loader = torch.utils.data.DataLoader(
-            dataset, batch_size=self.batch_size, shuffle=True, drop_last=True
+            dataset, batch_size=self.batch_size, shuffle=False, drop_last=False
         )
         self.network.eval()
         probability_batches = []
         predictive_probability_dist_batches = []
         for batch_x, _ in data_loader:
-            batch_x = torch.FloatTensor(batch_x)
+
             current_probabilities, predictive_distribution = self.network.predict_probabilities(batch_x)
             current_probabilities  = current_probabilities.detach().numpy()
             predictive_distribution = predictive_distribution.detach().numpy()
-            print(current_probabilities.shape)
             probability_batches.append(current_probabilities)
             predictive_probability_dist_batches.append(predictive_distribution)
 
         output = np.concatenate(probability_batches, axis=0)
-        output_pred_dist = predictive_probability_dist_batches
+        # output_pred_dist = predictive_probability_dist_batches
         assert isinstance(output, np.ndarray)
         assert np.allclose(np.sum(output, axis=1), 1.0)
-        return output, output_pred_dist
+        return output
+    
+    def transform_data(self, x: np.array, y: np.array) -> (np.array, np.array):
+        """
+        A method that reshapes the data.
+
+        Args:
+            x (array-like): The input data.
+            y (array-like): The target data.
+        Returns:
+            x (array-like): The reshaped input data.
+            y (array-like): The reshaped target data.
+        """
+        x = torch.FloatTensor(x.to_numpy())
+        y = torch.LongTensor(y.to_numpy()).squeeze(-1)
+        return x, y
     
 
-    def fit_predict(self, dataset: torch.utils.data.Dataset) -> (np.ndarray, np.ndarray):
+    def fit_predict(self, x, y, x_val) -> (np.ndarray, np.ndarray):
         """Combines fit and predict functions
 
         Args:
@@ -423,8 +437,11 @@ class Model(object):
         Returns:
             (np.ndarray, np.ndarray): The MLE and predictive distribution
         """
-        self.fit(dataset)
-        return self.predict(dataset)
+        self.fit(x, y)
+        x = self.predict(x_val)
+        x = np.round(x)
+        predictions = np.argmax(x, axis=1)
+        return predictions
     
 if __name__ == '__main__':
     pass

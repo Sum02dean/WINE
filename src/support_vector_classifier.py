@@ -5,7 +5,7 @@ from abc import ABC
 from utils import BaseModel
 from sklearn import svm
 
-class SVClassifier(BaseModel, ABC):
+class SVClassifierModel(BaseModel, ABC):
     """Build a SVM classifier
     """
     def __init__(self, C: float=1.0, gamma: float=1.0):

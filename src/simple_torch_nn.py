@@ -119,7 +119,7 @@ class SimmpleNetModel(BaseModel, ABC):
                 # Adjust learning weights
                 self.optimiser.step()
 
-    def predict(self, x: np.array) -> torch.Tensor:
+    def predict(self, x: np.array) -> np.array:
         """
         Predicts the output for a given input.
         """

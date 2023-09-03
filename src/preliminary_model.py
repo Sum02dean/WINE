@@ -10,9 +10,10 @@ import optuna
 import mlflow
 import mlflow.sklearn
 from mlflow.models.signature import infer_signature
-from random_forest import RandomForest
-from support_vector_classifier import SVClassifier
+from random_forest import RandomForestModel
+from support_vector_classifier import SVClassifierModel
 from simple_torch_nn import SimmpleNetModel
+from bayesian_neural_network import BayesModel
 
 # Establish mlflow logging config
 logging.basicConfig(level=logging.WARN)
@@ -34,10 +35,13 @@ def objective(trial):
 
         # Sample these classifiers
         classifier_name = trial.suggest_categorical("classifier",
-                                                    ['neural_network', 'RandomForest', 'SVC'])
+                                                    ['SimpleNetModel',
+                                                    'RandomForestModel',
+                                                    'SVClassifierModel'])
+
 
         # Iterate over model specific hyper-parameters
-        if classifier_name == "SVC":
+        if classifier_name == "SVClassifier":
 
             # Define optimizable hyperparameters ranges: C
             lower_sample_c = model_params['svm']['c_lower_sample']
@@ -55,7 +59,7 @@ def objective(trial):
                 "svc_gamma", lower_sample_gamma, upper_sample_gamma, log=True)
 
             # Build SVCClassifier by wrapping scikit-learn API
-            model = SVClassifier(C=svc_c, gamma=svc_gamma)
+            model = SVClassifierModel(C=svc_c, gamma=svc_gamma)
 
             # Transform data
             x_train, y_train = model.transform_data(train_x_raw, train_y_raw)
@@ -79,13 +83,13 @@ def objective(trial):
                                                 upper_sample_n_estimators, log=True)
 
             # Build RandomForest by wrapping scikit-learn API
-            model = RandomForest(max_depth=rf_max_depth, n_estimators=rf_n_estimators)
+            model = RandomForestModel(max_depth=rf_max_depth, n_estimators=rf_n_estimators)
 
             # Transform data
             x_train, y_train = model.transform_data(train_x_raw, train_y_raw)
             x_test, y_test = model.transform_data(test_x_raw , test_y_raw)
 
-        if classifier_name == "neural_network":
+        if classifier_name == "SimpleNetModel":
 
             # Define optimizable hyperparameters ranges: n_layers
             lower_sample_n_layers = model_params['neural_network']['n_layers_lower_sample']
@@ -121,10 +125,51 @@ def objective(trial):
             # Transform data
             x_train, y_train = model.transform_data(train_x_raw, train_y_raw)
             x_test, y_test = model.transform_data(test_x_raw , test_y_raw)
+
+        if classifier_name == "BayesModel":
+
+            # Define optimizable hyperparameters ranges: n_layers
+            lower_sample_n_layers = model_params[classifier_name]['n_layers_lower_sample']
+            upper_sample_n_layers = model_params[classifier_name]['n_layers_upper_sample']
+
+            # Define optimizable hyperparater ranges: n_nodes
+            lower_sample_n_nodes = model_params[classifier_name]['n_nodes_lower_sample']
+            upper_sample_n_nodes = model_params[classifier_name]['n_nodes_upper_sample']
+
+            # Define optimizable hyperparater ranges: lr
+            lower_sample_lr = model_params[classifier_name]['lr_lower_sample']
+            upper_sample_lr = model_params[classifier_name]['lr_upper_sample']
+
+
+            # Bayesian search over sampled space
+            nn_number_layers = trial.suggest_int("nn_layers", lower_sample_n_layers,
+                                             upper_sample_n_layers, log=False)
+
+            nn_layer_nodes = tuple([trial.suggest_int(f"layer_nodes_{str(i)}", lower_sample_n_nodes,
+                                  upper_sample_n_nodes, log=False)
+                                  for i in range(nn_number_layers)])
+
+            nn_lr = trial.suggest_float("lr", lower_sample_lr,
+                                             upper_sample_lr, log=False)
+            
+            # Only use the first 3 significant digits of the float
+            nn_lr = round(nn_lr, 3)
+
+            # Build simple neural network by wrapping Pytorch API
+            n_epochs=model_params['neural_network']['n_epochs']
+            model = BayesModel(
+                in_dim=13, hidden_dims=nn_layer_nodes, final_dim=2,
+                learning_rate=0.02, epochs=n_epochs,
+                n_mcs= model_params[classifier_name]['n_mcs'])
+
+            # Transform data
+            x_train, y_train = model.transform_data(train_x_raw, train_y_raw)
+            x_test, y_test = model.transform_data(test_x_raw , test_y_raw)
         
         # Predict on the train set
         predictions = model.fit_predict(x_train, y_train, x_test)
         test_acc = accuracy_score(y_test, predictions)
+    
         
         # Log artifcats
         signature = infer_signature(predictions, predictions)

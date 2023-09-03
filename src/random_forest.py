@@ -5,7 +5,7 @@ from abc import ABC
 from utils import BaseModel
 from sklearn.ensemble import RandomForestClassifier
 
-class RandomForest(BaseModel, ABC):
+class RandomForestModel(BaseModel, ABC):
     """Build a random forest classifier
     """
     def __init__(self, max_depth: int=10, n_estimators: int=20):
