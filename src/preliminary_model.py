@@ -14,6 +14,7 @@ from random_forest import RandomForestModel
 from support_vector_classifier import SVClassifierModel
 from simple_torch_nn import SimmpleNetModel
 from bayesian_neural_network import BayesModel
+import os
 
 # Establish mlflow logging config
 logging.basicConfig(level=logging.WARN)
@@ -41,7 +42,7 @@ def objective(trial):
 
 
         # Iterate over model specific hyper-parameters
-        if classifier_name == "SVClassifier":
+        if classifier_name == "SVClassifierModel":
 
             # Define optimizable hyperparameters ranges: C
             lower_sample_c = model_params['svm']['c_lower_sample']
@@ -65,7 +66,7 @@ def objective(trial):
             x_train, y_train = model.transform_data(train_x_raw, train_y_raw)
             x_test, y_test = model.transform_data(test_x_raw , test_y_raw)
 
-        if classifier_name == "RandomForest":
+        if classifier_name == "RandomForestModel":
 
             # Define optimizable hyperparameters ranges: max depth
             lower_sample_max_depth = model_params['random_forest']['max_depth_lower_sample']
@@ -186,6 +187,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # Read in the configs file
     FILE_NAME = "/Users/sum02dean/projects/wine_challenge/WINE/configs/config_file.json"
+    OUTPUT_DIR_NAME = "/Users/sum02dean/projects/wine_challenge/WINE/output"
     parser.add_argument("--config_file", help="path to configs file", type=str, default=FILE_NAME)
     args = parser.parse_args()
 
@@ -214,6 +216,15 @@ if __name__ == "__main__":
     # Optimize
     mlflow.set_experiment(experiment_name=mlflow_params["study_name"])
     study.optimize(objective, n_trials=mlflow_params["n_trials"])
+
+    # Build outputdir if not existing
+    if not os.path.exists(OUTPUT_DIR_NAME):
+        os.makedirs(OUTPUT_DIR_NAME)
+
+    # Save the best model parameters
+    with open(os.path.join(OUTPUT_DIR_NAME, 
+    f"best_params_{study.study_name}.json"), "w", encoding='utf-8') as f:
+        json.dump(study.best_params, f)
 
 # Run on terminal after running the prelimainary_model.py file:
 # optuna-dashboard sqlite:///db.sqlite3 (be inside the src directory)

@@ -14,7 +14,7 @@ class SVClassifierModel(BaseModel, ABC):
         self.model = self.init_model()
         super().__init__()
 
-    def fit(self, x, y) -> None:
+    def fit(self, x: np.array, y: np.array) -> None:
         """
         Fit the model to the training data and return the fitted model.
         
@@ -27,7 +27,7 @@ class SVClassifierModel(BaseModel, ABC):
         """
         return self.model.fit(x, y)
 
-    def predict(self, x) -> np.array:
+    def predict(self, x: np.array) -> np.array:
         """
         Predicts the output for a given input.
         """

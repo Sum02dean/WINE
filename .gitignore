@@ -1,4 +1,5 @@
 # Folders
+WINE/notebooks/
 data/
 mlruns/
 db.sqlite3

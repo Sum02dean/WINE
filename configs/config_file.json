@@ -9,7 +9,7 @@
         "project_name": "wine",
         "experiment_name": "wine",
         "run_name": "wine",
-        "study_name": "bayes_model_v9_676",
+        "study_name": "test_outputs_v2",
         "tracking_uri": "http://localhost:5000",
         "mlflow_tracking_uri": "http://localhost:5000",
         "mlflow_server_uri": "http://localhost:5000",
@@ -21,15 +21,15 @@
 
         "random_forest": {
             "max_depth_lower_sample": 10,
-            "max_depth_upper_sample": 1e1,
+            "max_depth_upper_sample": 1e3,
             "n_estimators_lower_sample": 1,
-            "n_estimators_upper_sample": 1e1},
+            "n_estimators_upper_sample": 1e3},
 
         "svm": {
             "c_lower_sample": 2,
-            "c_upper_sample": 100,
+            "c_upper_sample": 1e2,
             "gamma_lower_sample": 2,
-            "gamma_upper_sample": 500}, 
+            "gamma_upper_sample": 5e2}, 
 
         "neural_network": {
             "n_epochs": 200,
