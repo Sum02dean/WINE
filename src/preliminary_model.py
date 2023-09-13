@@ -40,7 +40,6 @@ def objective(trial):
                                                     'RandomForestModel',
                                                     'SVClassifierModel'])
 
-
         # Iterate over model specific hyper-parameters
         if classifier_name == "SVClassifierModel":
 
@@ -62,10 +61,6 @@ def objective(trial):
             # Build SVCClassifier by wrapping scikit-learn API
             model = SVClassifierModel(C=svc_c, gamma=svc_gamma)
 
-            # Transform data
-            x_train, y_train = model.transform_data(train_x_raw, train_y_raw)
-            x_test, y_test = model.transform_data(test_x_raw , test_y_raw)
-
         if classifier_name == "RandomForestModel":
 
             # Define optimizable hyperparameters ranges: max depth
@@ -85,10 +80,6 @@ def objective(trial):
 
             # Build RandomForest by wrapping scikit-learn API
             model = RandomForestModel(max_depth=rf_max_depth, n_estimators=rf_n_estimators)
-
-            # Transform data
-            x_train, y_train = model.transform_data(train_x_raw, train_y_raw)
-            x_test, y_test = model.transform_data(test_x_raw , test_y_raw)
 
         if classifier_name == "SimpleNetModel":
 
@@ -122,10 +113,6 @@ def objective(trial):
             model = SimmpleNetModel(
                 in_dim=13, hidden_dims=nn_layer_nodes, final_dim=2,
                 learning_rate=nn_lr, epochs=n_epochs)
-
-            # Transform data
-            x_train, y_train = model.transform_data(train_x_raw, train_y_raw)
-            x_test, y_test = model.transform_data(test_x_raw , test_y_raw)
 
         if classifier_name == "BayesModel":
 
@@ -163,15 +150,14 @@ def objective(trial):
                 learning_rate=0.02, epochs=n_epochs,
                 n_mcs= model_params[classifier_name]['n_mcs'])
 
-            # Transform data
-            x_train, y_train = model.transform_data(train_x_raw, train_y_raw)
-            x_test, y_test = model.transform_data(test_x_raw , test_y_raw)
-        
+        # Transform data
+        x_train, y_train = model.transform_data(train_x_raw, train_y_raw)
+        x_test, y_test = model.transform_data(test_x_raw , test_y_raw)
+
         # Predict on the train set
         predictions = model.fit_predict(x_train, y_train, x_test)
         test_acc = accuracy_score(y_test, predictions)
-    
-        
+
         # Log artifcats
         signature = infer_signature(predictions, predictions)
         mlflow.log_artifacts('/Users/sum02dean/projects/wine_challenge/WINE/data')

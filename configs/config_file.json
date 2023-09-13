@@ -9,7 +9,7 @@
         "project_name": "wine",
         "experiment_name": "wine",
         "run_name": "wine",
-        "study_name": "test_outputs_v2",
+        "study_name": "bayes_check_layers_v2",
         "tracking_uri": "http://localhost:5000",
         "mlflow_tracking_uri": "http://localhost:5000",
         "mlflow_server_uri": "http://localhost:5000",
@@ -42,7 +42,7 @@
 
             "BayesModel": {
                 "n_epochs": 200,
-                "n_layers_lower_sample": 2,
+                "n_layers_lower_sample": 1,
                 "n_layers_upper_sample": 4,
                 "n_nodes_lower_sample": 50,
                 "n_nodes_upper_sample": 500,

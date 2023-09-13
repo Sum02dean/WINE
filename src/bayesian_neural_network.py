@@ -4,6 +4,7 @@ import warnings
 import typing
 import abc
 import numpy as np
+import pandas as pd
 from tqdm import trange
 import torch
 import torch.optim
@@ -43,6 +44,7 @@ class ParameterDistribution(torch.nn.Module, metaclass=abc.ABCMeta):
         # DO NOT USE THIS METHOD
         warnings.warn('ParameterDistribution should not be called! Use its explicit methods!')
         return self.log_likelihood(values)
+
 class MyDataset(torch.utils.data.Dataset):
     """Custom DataSet class for Pytorch models"""
     def __init__(self, features, labels=None):
@@ -62,6 +64,7 @@ class MyDataset(torch.utils.data.Dataset):
         else:
             y = x
         return x, y
+
 class MultivariateDiagonalGaussian(ParameterDistribution):
     """
     Multivariate diagonal Gaussian distribution,
@@ -86,6 +89,7 @@ class MultivariateDiagonalGaussian(ParameterDistribution):
     def sample(self) -> torch.Tensor:
         epsilon = torch.distributions.Normal(0,1).sample(self.rho.size())
         return self.mu + self.sig*epsilon
+
 class GaussianMixturePrior(ParameterDistribution):
     """
     Mixture of two Gaussian distributions as described in Bludell et al., 2015.
@@ -99,6 +103,8 @@ class GaussianMixturePrior(ParameterDistribution):
         self.pi = pi # Probabilistic weight
 
     def log_likelihood(self, values: torch.Tensor) -> torch.Tensor:
+        # Make sure all elements in values are real valued
+        values = torch.nan_to_num(values, 0)
         dist_0 = Normal(loc=self.mu_0, scale=self.sigma_0)
         dist_1 = Normal(loc=self.mu_1, scale=self.sigma_1)
         ll_0 = dist_0.log_prob(values)
@@ -111,6 +117,7 @@ class GaussianMixturePrior(ParameterDistribution):
             return Normal(loc=self.mu_0, scale=self.sigma_0).sample()
         else:
             return Normal(loc=self.mu_1, scale=self.sigma_1).sample()
+
 class BayesMultiLoss():
 
     """ Computes the KLD + NLL multi-objective loss. KLD is computed as mean of n-bathches.
@@ -153,6 +160,7 @@ class BayesMultiLoss():
         nll = self.__compute_nll_loss()
         multi_loss = kld + nll
         return multi_loss
+
 class BayesianLayer(nn.Module):
     """
     Module implementing a single Bayesian feedforward layer.
@@ -232,6 +240,9 @@ class BayesianLayer(nn.Module):
 
         # Generate the log-liklihood of the prior and log-posterior
         log_prior = self.prior.log_likelihood(weights)
+
+        # make sure that the weights are not NaNs
+        weights = torch.nan_to_num(weights, 0)
         log_variational_posterior = self.weights_var_posterior.log_likelihood(weights)
 
         # As in standard machine learning, we simply add on the bias term to each output in the next adjacent layer
@@ -246,6 +257,7 @@ class BayesianLayer(nn.Module):
             bias = None
         # Compute the predictive outputs
         return F.linear(inputs, weights, bias), log_prior, log_variational_posterior
+
 class BayesNet(nn.Module):
     """
     Module implementing a Bayesian feedforward neural network using BayesianLayer objects.
@@ -351,6 +363,11 @@ class BayesModel(object):
         for _ in progress_bar:
             num_batches = len(data_loader)
             for batch_idx, (batch_x, batch_y) in enumerate(data_loader):
+
+                # Check if ther are any nans in batch_x and batch_y
+                assert torch.all(torch.isfinite(batch_x))
+                assert torch.all(torch.isfinite(batch_y))
+                
                 # Convert the data-types
                 self.network.zero_grad()
 
@@ -362,8 +379,16 @@ class BayesModel(object):
                     current_logits = self.network(batch_x)
                     outputs, log_prior, log_posterior = current_logits
 
+                    # Assert there atr no nns in the tenors
+                    assert not torch.any(torch.isnan(outputs))
+                    assert not torch.any(torch.isnan(log_prior))
+                    assert not torch.any(torch.isnan(log_posterior))
+
                     # Compute the losses
                     batch_size = data_loader.batch_size
+                    # batch_size = batch_x.shape[0]
+
+
                     BML = BayesMultiLoss(net_outputs=outputs, targets=batch_y,
                                             log_posterior=log_posterior, log_prior=log_prior,
                                             batch_size=batch_size, num_batches=num_batches, method='approx')
@@ -373,6 +398,10 @@ class BayesModel(object):
                 # Backpropagate to get the gradients
                 loss = loss/self.n_mcs
                 loss.backward()
+
+                # Clip gradients using clip_grad_norm_
+                # max_grad_norm = 1.0  # Set your desired maximum gradient norm
+                # torch.nn.utils.clip_grad_norm_(self.network.parameters(), max_grad_norm)
 
                 # Step the gradients
                 self.optimizer.step()
@@ -412,7 +441,7 @@ class BayesModel(object):
         assert np.allclose(np.sum(output, axis=1), 1.0)
         return output
     
-    def transform_data(self, x: np.array, y: np.array) -> (np.array, np.array):
+    def transform_data(self, x: pd.DataFrame, y: pd.Series) -> (np.array, np.array):
         """
         A method that reshapes the data.
 
@@ -442,6 +471,7 @@ class BayesModel(object):
         x = np.round(x)
         predictions = np.argmax(x, axis=1)
         return predictions
-    
+
+
 if __name__ == '__main__':
     pass
